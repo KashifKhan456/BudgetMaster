@@ -14,6 +14,8 @@ import DatePicker from 'primevue/datepicker';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 
+import debounce from 'lodash/debounce';
+
 const props = defineProps({
     transactions: Array,
     categories: Array,
@@ -28,11 +30,29 @@ const filters = ref({
     type: props.filters?.type || '',
 });
 
-watch(filters, (newFilters) => {
-    router.get(route('transactions.index'), newFilters, {
+const loading = ref(false);
+
+const updateParams = debounce((newFilters) => {
+    const params = { ...newFilters };
+    if (params.start_date instanceof Date) {
+        params.start_date = params.start_date.toISOString().split('T')[0];
+    }
+    if (params.end_date instanceof Date) {
+        params.end_date = params.end_date.toISOString().split('T')[0];
+    }
+    router.get(route('transactions.index'), params, {
         preserveState: true,
         replace: true,
+        showProgress: false,
+        onFinish: () => {
+            loading.value = false;
+        },
     });
+}, 300);
+
+watch(filters, (newFilters) => {
+    loading.value = true;
+    updateParams(newFilters);
 }, { deep: true });
 
 const form = useForm({
@@ -57,7 +77,8 @@ const openModal = (transaction = null) => {
     } else {
         editingTransaction.value = null;
         form.reset();
-        form.date = new Date().toISOString().split('T')[0];
+        form.reset();
+        form.date = '';
     }
     showModal.value = true;
 };
@@ -69,43 +90,49 @@ const closeModal = () => {
 };
 
 const submit = () => {
+    const data = form.data();
+    if (data.date instanceof Date) {
+        data.date = data.date.toISOString().split('T')[0];
+    }
+
     if (editingTransaction.value) {
-        form.put(route('transactions.update', editingTransaction.value.id), {
+        form.transform(() => data).put(route('transactions.update', editingTransaction.value.id), {
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post(route('transactions.store'), {
+        form.transform(() => data).post(route('transactions.store'), {
             onSuccess: () => closeModal(),
         });
     }
 };
 
-    const importForm = useForm({
-        file: null,
+const importForm = useForm({
+    file: null,
+});
+
+const showImportModal = ref(false);
+
+const openImportModal = () => {
+    showImportModal.value = true;
+};
+
+const closeImportModal = () => {
+    showImportModal.value = false;
+    importForm.reset();
+};
+
+const submitImport = () => {
+    importForm.post(route('import.transactions'), {
+        onSuccess: () => closeImportModal(),
     });
+};
 
-    const showImportModal = ref(false);
+const deleteTransaction = (id) => {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+        useForm({}).delete(route('transactions.destroy', id));
+    }
+};
 
-    const openImportModal = () => {
-        showImportModal.value = true;
-    };
-
-    const closeImportModal = () => {
-        showImportModal.value = false;
-        importForm.reset();
-    };
-
-    const submitImport = () => {
-        importForm.post(route('import.transactions'), {
-            onSuccess: () => closeImportModal(),
-        });
-    };
-
-    const deleteTransaction = (id) => {
-        if (confirm('Are you sure you want to delete this transaction?')) {
-            useForm({}).delete(route('transactions.destroy', id));
-        }
-    };
 </script>
 
 <template>
@@ -135,27 +162,57 @@ const submit = () => {
                         <div class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
                             <div>
                                 <InputLabel for="filter_search" value="Search" />
-                                <InputText id="filter_search" v-model="filters.search" type="text" class="mt-1 block w-full" placeholder="Search description..." />
+                                <InputText 
+                                    id="filter_search" 
+                                    v-model="filters.search" 
+                                    type="text" 
+                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                                    placeholder="Search description..." 
+                                />
                             </div>
                             <div>
                                 <InputLabel for="filter_start_date" value="Start Date" />
-                                <DatePicker id="filter_start_date" v-model="filters.start_date" dateFormat="yy-mm-dd" showIcon class="mt-1 w-full" />
+                                <DatePicker id="filter_start_date" v-model="filters.start_date" dateFormat="yy-mm-dd" showIcon showClear :minDate="null" class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                             </div>
                             <div>
                                 <InputLabel for="filter_end_date" value="End Date" />
-                                <DatePicker id="filter_end_date" v-model="filters.end_date" dateFormat="yy-mm-dd" showIcon class="mt-1 w-full" />
+                                <DatePicker id="filter_end_date" v-model="filters.end_date" dateFormat="yy-mm-dd" showIcon showClear :minDate="null" class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                             </div>
                             <div>
                                 <InputLabel for="filter_category" value="Category" />
-                                <Select id="filter_category" v-model="filters.category_id" :options="categories" optionLabel="name" optionValue="id" placeholder="All Categories" class="mt-1 w-full" showClear />
+                                <Select 
+                                    id="filter_category" 
+                                    v-model="filters.category_id" 
+                                    :options="categories" 
+                                    optionLabel="name" 
+                                    optionValue="id" 
+                                    placeholder="All Categories" 
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                                    showClear 
+                                />
                             </div>
                             <div>
                                 <InputLabel for="filter_type" value="Type" />
-                                <Select id="filter_type" v-model="filters.type" :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" optionLabel="label" optionValue="value" placeholder="All Types" class="mt-1 w-full" showClear />
+                                <Select 
+                                    id="filter_type" 
+                                    v-model="filters.type" 
+                                    :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
+                                    optionLabel="label" 
+                                    optionValue="value" 
+                                    placeholder="All Types" 
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                                    showClear 
+                                />
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto relative">
+                            <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead>
                                     <tr>
@@ -181,6 +238,11 @@ const submit = () => {
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="openModal(transaction)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
                                             <button @click="deleteTransaction(transaction.id)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="transactions.length === 0">
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                            No records found.
                                         </td>
                                     </tr>
                                 </tbody>
@@ -217,7 +279,7 @@ const submit = () => {
 
                 <div class="mt-4">
                     <InputLabel for="date" value="Date" />
-                    <DatePicker id="date" v-model="form.date" dateFormat="yy-mm-dd" showIcon class="mt-1 w-full" />
+                    <DatePicker id="date" v-model="form.date" dateFormat="yy-mm-dd" showIcon showOnFocus class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                     <div v-if="form.errors.date" class="text-red-500 text-sm mt-1">{{ form.errors.date }}</div>
                 </div>
 

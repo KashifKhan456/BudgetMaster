@@ -1,17 +1,45 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, router, useForm } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
+import Select from 'primevue/select';
+import InputText from 'primevue/inputtext';
+
+import debounce from 'lodash/debounce';
 
 const props = defineProps({
     categories: Array,
+    filters: Object,
 });
+
+const filters = ref({
+    search: props.filters?.search || '',
+    type: props.filters?.type || '',
+});
+
+const loading = ref(false);
+
+const updateParams = debounce((newFilters) => {
+    router.get(route('categories.index'), newFilters, {
+        preserveState: true,
+        replace: true,
+        showProgress: false,
+        onFinish: () => {
+            loading.value = false;
+        },
+    });
+}, 300);
+
+watch(filters, (newFilters) => {
+    loading.value = true;
+    updateParams(newFilters);
+}, { deep: true });
 
 const form = useForm({
     name: '',
@@ -59,6 +87,7 @@ const deleteCategory = (id) => {
         useForm({}).delete(route('categories.destroy', id));
     }
 };
+
 </script>
 
 <template>
@@ -76,7 +105,40 @@ const deleteCategory = (id) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <div class="overflow-x-auto">
+                        <!-- Filters -->
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <InputLabel for="filter_search" value="Search" />
+                                <InputText 
+                                    id="filter_search" 
+                                    v-model="filters.search" 
+                                    type="text" 
+                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                                    placeholder="Search name..." 
+                                />
+                            </div>
+                            <div>
+                                <InputLabel for="filter_type" value="Type" />
+                                <Select 
+                                    id="filter_type" 
+                                    v-model="filters.type" 
+                                    :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
+                                    optionLabel="label" 
+                                    optionValue="value" 
+                                    placeholder="All Types" 
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                                    showClear 
+                                />
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto relative">
+                            <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead>
                                     <tr>
@@ -96,6 +158,11 @@ const deleteCategory = (id) => {
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="openModal(category)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
                                             <button @click="deleteCategory(category.id)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="categories.length === 0">
+                                        <td colspan="4" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                            No records found.
                                         </td>
                                     </tr>
                                 </tbody>

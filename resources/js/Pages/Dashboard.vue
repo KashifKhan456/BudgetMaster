@@ -1,10 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { formatDate } from '@/Utils/date';
 import { Doughnut, Line } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title } from 'chart.js';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+import debounce from 'lodash/debounce';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
 
@@ -13,6 +14,34 @@ const props = defineProps({
     expensesByCategory: Array,
     monthlyTrend: Array,
     recentTransactions: Array,
+    categories: Array, // Assuming categories are passed to dashboard
+    filters: Object,
+});
+
+const search = ref(props.filters?.search || '');
+const category = ref(props.filters?.category || '');
+const loading = ref(false);
+
+const updateFilters = debounce(() => {
+    router.get(
+        route('dashboard'),
+        { search: search.value, category: category.value },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            showProgress: false,
+            only: ['recentTransactions'],
+            onFinish: () => {
+                loading.value = false;
+            },
+        }
+    );
+}, 300);
+
+watch([search, category], () => {
+    loading.value = true;
+    updateFilters();
 });
 
 const chartData = computed(() => {
@@ -108,8 +137,32 @@ const chartOptions = {
 
                 <!-- Recent Transactions -->
                 <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Transactions</h3>
-                    <div class="overflow-x-auto">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Recent Transactions</h3>
+                        <div class="flex space-x-4 w-full md:w-auto">
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Search transactions..."
+                                class="w-full md:w-64 px-4 py-2 rounded-md border border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600"
+                            />
+                            <select
+                                v-model="category"
+                                class="w-full md:w-48 px-4 py-2 rounded-md border border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600"
+                            >
+                                <option value="">All Categories</option>
+                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto relative">
+                        <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                            <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead>
                                 <tr>
@@ -131,7 +184,7 @@ const chartOptions = {
                                     </td>
                                 </tr>
                                 <tr v-if="recentTransactions.length === 0">
-                                    <td colspan="3" class="px-4 py-2 text-sm text-center text-gray-500 dark:text-gray-400">No recent transactions.</td>
+                                    <td colspan="3" class="px-4 py-2 text-sm text-center text-gray-500 dark:text-gray-400">No recent transactions found.</td>
                                 </tr>
                             </tbody>
                         </table>

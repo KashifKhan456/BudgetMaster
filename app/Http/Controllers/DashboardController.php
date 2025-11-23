@@ -87,7 +87,14 @@ class DashboardController extends Controller
             ],
             'expensesByCategory' => $expensesByCategory,
             'monthlyTrend' => $monthlyTrend,
+            'categories' => \App\Models\Category::where('user_id', $user->id)->get(),
             'recentTransactions' => Transaction::where('user_id', $user->id)
+                ->when(request('search'), function ($query, $search) {
+                    $query->where('description', 'like', "%{$search}%");
+                })
+                ->when(request('category'), function ($query, $category) {
+                    $query->where('category_id', $category);
+                })
                 ->with('category')
                 ->latest('date')
                 ->take(5)

@@ -4,63 +4,41 @@ namespace App\Http\Controllers;
 
 use App\Models\RecurringTransaction;
 use App\Models\Category;
+use App\Http\Requests\StoreRecurringTransactionRequest;
+use App\Http\Requests\UpdateRecurringTransactionRequest;
+use App\Services\RecurringTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class RecurringTransactionController extends Controller
 {
-    public function index()
+    protected $recurringTransactionService;
+
+    public function __construct(RecurringTransactionService $recurringTransactionService)
+    {
+        $this->recurringTransactionService = $recurringTransactionService;
+    }
+
+    public function index(Request $request)
     {
         return Inertia::render('Recurring/Index', [
-            'recurringTransactions' => RecurringTransaction::where('user_id', Auth::id())
-                ->with('category')
-                ->get(),
+            'recurringTransactions' => $this->recurringTransactionService->getRecurringTransactions(Auth::id(), $request->only(['search', 'category_id', 'type'])),
             'categories' => Category::where('user_id', Auth::id())->get(),
+            'filters' => $request->only(['search', 'category_id', 'type']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreRecurringTransactionRequest $request)
     {
-        $request->validate([
-            'category_id' => 'nullable|exists:categories,id',
-            'amount' => 'required|numeric|min:0',
-            'type' => 'required|in:expense,income',
-            'interval' => 'required|in:daily,weekly,monthly,yearly',
-            'start_date' => 'required|date',
-            'description' => 'nullable|string|max:255',
-        ]);
-
-        RecurringTransaction::create([
-            'user_id' => Auth::id(),
-            'category_id' => $request->category_id,
-            'amount' => $request->amount,
-            'type' => $request->type,
-            'interval' => $request->interval,
-            'start_date' => $request->start_date,
-            'next_run_date' => $request->start_date, // Initial run date
-            'description' => $request->description,
-        ]);
+        $this->recurringTransactionService->createRecurringTransaction($request->validated());
 
         return redirect()->back()->with('success', 'Recurring transaction created successfully.');
     }
 
-    public function update(Request $request, RecurringTransaction $recurring)
+    public function update(UpdateRecurringTransactionRequest $request, RecurringTransaction $recurring)
     {
-        if ($recurring->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'category_id' => 'nullable|exists:categories,id',
-            'amount' => 'required|numeric|min:0',
-            'type' => 'required|in:expense,income',
-            'interval' => 'required|in:daily,weekly,monthly,yearly',
-            'start_date' => 'required|date',
-            'description' => 'nullable|string|max:255',
-        ]);
-
-        $recurring->update($request->only(['category_id', 'amount', 'type', 'interval', 'start_date', 'description']));
+        $this->recurringTransactionService->updateRecurringTransaction($recurring, $request->validated());
 
         return redirect()->back()->with('success', 'Recurring transaction updated successfully.');
     }
@@ -71,7 +49,7 @@ class RecurringTransactionController extends Controller
             abort(403);
         }
 
-        $recurring->delete();
+        $this->recurringTransactionService->deleteRecurringTransaction($recurring);
 
         return redirect()->back()->with('success', 'Recurring transaction deleted successfully.');
     }

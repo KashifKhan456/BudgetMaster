@@ -3,50 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    public function index()
+    protected $categoryService;
+
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
+    public function index(Request $request)
     {
         return Inertia::render('Categories/Index', [
-            'categories' => Category::where('user_id', Auth::id())->get(),
+            'categories' => $this->categoryService->getCategories(Auth::id(), $request->only(['search', 'type'])),
+            'filters' => $request->only(['search', 'type']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:expense,income',
-            'color' => 'nullable|string|max:20',
-        ]);
-
-        Category::create([
-            'user_id' => Auth::id(),
-            'name' => $request->name,
-            'type' => $request->type,
-            'color' => $request->color,
-        ]);
+        $this->categoryService->createCategory($request->validated());
 
         return redirect()->back()->with('success', 'Category created successfully.');
     }
 
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        if ($category->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:expense,income',
-            'color' => 'nullable|string|max:20',
-        ]);
-
-        $category->update($request->only(['name', 'type', 'color']));
+        $this->categoryService->updateCategory($category, $request->validated());
 
         return redirect()->back()->with('success', 'Category updated successfully.');
     }
@@ -57,7 +47,7 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $category->delete();
+        $this->categoryService->deleteCategory($category);
 
         return redirect()->back()->with('success', 'Category deleted successfully.');
     }

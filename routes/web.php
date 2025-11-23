@@ -9,6 +9,8 @@ use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\SavingsGoalController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ExpenseRequestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,11 +29,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('categories', CategoryController::class);
     Route::resource('budgets', BudgetController::class);
+    Route::post('/budgets/{budget}/share', [BudgetController::class, 'share'])->name('budgets.share');
+    Route::delete('/budgets/{budget}/share/{user}', [BudgetController::class, 'unshare'])->name('budgets.unshare');
+    Route::resource('expense-requests', ExpenseRequestController::class)->only(['index', 'store', 'update']); // Added this line
     Route::resource('transactions', TransactionController::class);
     Route::resource('recurring', RecurringTransactionController::class);
     Route::resource('goals', SavingsGoalController::class);
     Route::get('/export', [ExportController::class, 'export'])->name('export.transactions');
     Route::post('/import', [ImportController::class, 'store'])->name('import.transactions');
+
+    Route::group(['middleware' => ['can:manage users']], function () {
+        Route::resource('users', UserController::class);
+    });
 });
 
 Route::middleware('auth')->group(function () {

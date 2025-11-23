@@ -4,57 +4,41 @@ namespace App\Http\Controllers;
 
 use App\Models\Budget;
 use App\Models\Category;
+use App\Http\Requests\StoreBudgetRequest;
+use App\Http\Requests\UpdateBudgetRequest;
+use App\Services\BudgetService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class BudgetController extends Controller
 {
-    public function index()
+    protected $budgetService;
+
+    public function __construct(BudgetService $budgetService)
+    {
+        $this->budgetService = $budgetService;
+    }
+
+    public function index(Request $request)
     {
         return Inertia::render('Budgets/Index', [
-            'budgets' => Budget::where('user_id', Auth::id())->with('category')->get(),
+            'budgets' => $this->budgetService->getBudgets(Auth::id(), $request->only(['search', 'category_id', 'start_date', 'end_date'])),
             'categories' => Category::where('user_id', Auth::id())->get(),
+            'filters' => $request->only(['search', 'category_id', 'start_date', 'end_date']),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreBudgetRequest $request)
     {
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric|min:0',
-            'period' => 'required|in:month,year',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-        ]);
-
-        Budget::create([
-            'user_id' => Auth::id(),
-            'category_id' => $request->category_id,
-            'amount' => $request->amount,
-            'period' => $request->period,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-        ]);
+        $this->budgetService->createBudget($request->validated());
 
         return redirect()->back()->with('success', 'Budget created successfully.');
     }
 
-    public function update(Request $request, Budget $budget)
+    public function update(UpdateBudgetRequest $request, Budget $budget)
     {
-        if ($budget->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric|min:0',
-            'period' => 'required|in:month,year',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-        ]);
-
-        $budget->update($request->only(['category_id', 'amount', 'period', 'start_date', 'end_date']));
+        $this->budgetService->updateBudget($budget, $request->validated());
 
         return redirect()->back()->with('success', 'Budget updated successfully.');
     }
@@ -64,9 +48,35 @@ class BudgetController extends Controller
         if ($budget->user_id !== Auth::id()) {
             abort(403);
         }
+        $this->budgetService->deleteBudget($budget);
+        return redirect()->route('budgets.index');
+    }
 
-        $budget->delete();
+    public function share(Request $request, Budget $budget)
+    {
+        if ($budget->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-        return redirect()->back()->with('success', 'Budget deleted successfully.');
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        try {
+            $this->budgetService->shareBudget($budget->id, $request->email);
+            return redirect()->back()->with('success', 'Budget shared successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['email' => $e->getMessage()]);
+        }
+    }
+
+    public function unshare(Budget $budget, User $user)
+    {
+        if ($budget->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $this->budgetService->removeUser($budget->id, $user->id);
+        return redirect()->back()->with('success', 'User removed from budget.');
     }
 }

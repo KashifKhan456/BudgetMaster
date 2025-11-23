@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User; // Added for User relationship
 use App\Models\Transaction; // Added for Transaction relationship
@@ -9,6 +10,8 @@ use App\Models\Budget; // Added for Budget relationship
 
 class Category extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['user_id', 'name', 'type', 'color'];
 
     public function user()

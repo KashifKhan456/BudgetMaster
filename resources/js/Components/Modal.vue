@@ -97,7 +97,7 @@ const maxWidthClass = computed(() => {
                     @click="close"
                 >
                     <div
-                        class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900"
+                        class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-black"
                     />
                 </div>
             </Transition>
@@ -112,9 +112,21 @@ const maxWidthClass = computed(() => {
             >
                 <div
                     v-show="show"
-                    class="mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full dark:bg-gray-800"
+                    class="mb-6 transform rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full dark:bg-[#1a1a1a] overflow-visible"
                     :class="maxWidthClass"
                 >
+                    <div class="absolute top-0 right-0 pt-4 pr-4">
+                        <button
+                            type="button"
+                            class="rounded-full p-2 bg-white text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+                            @click="close"
+                        >
+                            <span class="sr-only">Close</span>
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                     <slot v-if="showSlot" />
                 </div>
             </Transition>

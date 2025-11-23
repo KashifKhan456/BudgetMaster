@@ -1,14 +1,39 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import Swal from 'sweetalert2';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+
+watch(() => page.props.flash, (flash) => {
+    if (flash?.success) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: flash.success,
+            timer: 3000,
+            showConfirmButton: false,
+            background: document.documentElement.classList.contains('dark') ? '#1a1a1a' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
+        });
+    }
+    if (flash?.error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: flash.error,
+            background: document.documentElement.classList.contains('dark') ? '#1a1a1a' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
+        });
+    }
+}, { deep: true });
 </script>
 
 <template>
@@ -69,6 +94,19 @@ const showingNavigationDropdown = ref(false);
                                     :active="route().current('goals.*')"
                                 >
                                     Goals
+                                </NavLink>
+                                <NavLink
+                                    :href="route('expense-requests.index')"
+                                    :active="route().current('expense-requests.*')"
+                                >
+                                    Requests
+                                </NavLink>
+                                <NavLink
+                                    v-if="$page.props.auth.can.manage_users"
+                                    :href="route('users.index')"
+                                    :active="route().current('users.*')"
+                                >
+                                    Users
                                 </NavLink>
                             </div>
                         </div>
@@ -209,6 +247,19 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('goals.*')"
                         >
                             Goals
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('expense-requests.index')"
+                            :active="route().current('expense-requests.*')"
+                        >
+                            Requests
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            v-if="$page.props.auth.can.manage_users"
+                            :href="route('users.index')"
+                            :active="route().current('users.*')"
+                        >
+                            Users
                         </ResponsiveNavLink>
                     </div>
 
