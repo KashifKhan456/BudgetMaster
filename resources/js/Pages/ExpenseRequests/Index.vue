@@ -10,6 +10,9 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 
 import debounce from 'lodash/debounce';
+import Select from 'primevue/select';
+import InputText from 'primevue/inputtext';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     requests: Array,
@@ -69,9 +72,19 @@ const rejectForm = useForm({
 });
 
 const approve = (request) => {
-    if (confirm('Are you sure you want to approve this request?')) {
-        approveForm.put(route('expense-requests.update', request.id));
-    }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to approve this expense request.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#10B981', // Green-500
+        cancelButtonColor: '#EF4444', // Red-500
+        confirmButtonText: 'Yes, approve it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            approveForm.put(route('expense-requests.update', request.id));
+        }
+    });
 };
 
 const reject = (request) => {
@@ -190,33 +203,55 @@ const formatCurrency = (amount) => {
                 <div class="mt-6">
                     <div class="mb-4">
                         <InputLabel for="budget" value="Budget" />
-                        <select id="budget" v-model="form.budget_id" class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                            <option value="" disabled>Select a Budget</option>
-                            <option v-for="budget in budgets" :key="budget.id" :value="budget.id">
-                                {{ budget.name || 'Budget #' + budget.id }} ({{ formatCurrency(budget.amount) }})
-                            </option>
-                        </select>
+                        <Select 
+                            id="budget" 
+                            v-model="form.budget_id" 
+                            :options="budgets" 
+                            optionLabel="name" 
+                            optionValue="id" 
+                            placeholder="Select a Budget" 
+                            appendTo="body"
+                            overlayClass="!z-[9999]"
+                            class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        >
+                            <template #option="slotProps">
+                                {{ slotProps.option.name || 'Budget #' + slotProps.option.id }} ({{ formatCurrency(slotProps.option.amount) }})
+                            </template>
+                            <template #value="slotProps">
+                                <span v-if="slotProps.value">
+                                    {{ budgets.find(b => b.id === slotProps.value)?.name || 'Budget #' + slotProps.value }} ({{ formatCurrency(budgets.find(b => b.id === slotProps.value)?.amount) }})
+                                </span>
+                                <span v-else>
+                                    {{ slotProps.placeholder }}
+                                </span>
+                            </template>
+                        </Select>
                         <div v-if="form.errors.budget_id" class="text-red-500 text-xs mt-1">{{ form.errors.budget_id }}</div>
                     </div>
 
                     <div class="mb-4">
                         <InputLabel for="category" value="Category" />
-                        <select id="category" v-model="form.category_id" class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                            <option value="" disabled>Select a Category</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.id">
-                                {{ category.name }}
-                            </option>
-                        </select>
+                        <Select 
+                            id="category" 
+                            v-model="form.category_id" 
+                            :options="categories" 
+                            optionLabel="name" 
+                            optionValue="id" 
+                            placeholder="Select a Category" 
+                            appendTo="body"
+                            overlayClass="!z-[9999]"
+                            class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        />
                         <div v-if="form.errors.category_id" class="text-red-500 text-xs mt-1">{{ form.errors.category_id }}</div>
                     </div>
 
                     <div class="mb-4">
                         <InputLabel for="amount" value="Amount" />
-                        <TextInput
+                        <InputText
                             id="amount"
                             type="number"
                             step="0.01"
-                            class="mt-1 block w-full"
+                            class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                             v-model="form.amount"
                             required
                         />
@@ -225,10 +260,10 @@ const formatCurrency = (amount) => {
 
                     <div class="mb-4">
                         <InputLabel for="description" value="Description" />
-                        <TextInput
+                        <InputText
                             id="description"
                             type="text"
-                            class="mt-1 block w-full"
+                            class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                             v-model="form.description"
                         />
                         <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>

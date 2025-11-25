@@ -37,6 +37,7 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search']),
+            'roles' => Role::all()->pluck('name'),
         ]);
     }
 

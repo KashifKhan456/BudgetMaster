@@ -6,6 +6,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
+import NotificationDropdown from '@/Components/NotificationDropdown.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
@@ -114,6 +115,9 @@ watch(() => page.props.flash, (flash) => {
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Theme Toggle -->
                             <ThemeToggle class="mr-4" />
+
+                            <!-- Notification Dropdown -->
+                            <NotificationDropdown class="mr-4" />
 
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">

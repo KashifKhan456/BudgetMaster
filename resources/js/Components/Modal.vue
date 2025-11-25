@@ -27,7 +27,7 @@ watch(
             document.body.style.overflow = 'hidden';
             showSlot.value = true;
 
-            dialog.value?.showModal();
+            dialog.value?.show();
         } else {
             document.body.style.overflow = '';
 
@@ -75,10 +75,11 @@ const maxWidthClass = computed(() => {
 </script>
 
 <template>
-    <dialog
-        class="z-50 m-0 min-h-full min-w-full overflow-y-auto bg-transparent backdrop:bg-transparent"
-        ref="dialog"
-    >
+    <Teleport to="body">
+        <dialog
+            class="z-50 m-0 min-h-full min-w-full overflow-y-auto bg-transparent backdrop:bg-transparent fixed inset-0"
+            ref="dialog"
+        >
         <div
             class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-0"
             scroll-region
@@ -131,5 +132,6 @@ const maxWidthClass = computed(() => {
                 </div>
             </Transition>
         </div>
-    </dialog>
+        </dialog>
+    </Teleport>
 </template>

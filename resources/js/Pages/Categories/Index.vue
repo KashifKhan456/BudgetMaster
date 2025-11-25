@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -10,6 +10,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
+import ColorPicker from 'primevue/colorpicker';
 
 import debounce from 'lodash/debounce';
 
@@ -47,6 +48,17 @@ const form = useForm({
     color: '#000000',
 });
 
+const pickerColor = computed({
+    get() {
+        return form.color ? form.color.replace('#', '') : '000000';
+    },
+    set(value) {
+        if (typeof value === 'string') {
+            form.color = '#' + value.replace('#', '');
+        }
+    }
+});
+
 const editingCategory = ref(null);
 const showModal = ref(false);
 
@@ -60,6 +72,7 @@ const openModal = (category = null) => {
         editingCategory.value = null;
         form.reset();
         form.type = 'expense'; // Default
+        form.color = '#000000';
     }
     showModal.value = true;
 };
@@ -187,16 +200,25 @@ const deleteCategory = (id) => {
 
                 <div class="mt-4">
                     <InputLabel for="type" value="Type" />
-                    <select id="type" v-model="form.type" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
-                    </select>
+                    <Select 
+                        id="type" 
+                        v-model="form.type" 
+                        :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        appendTo="body"
+                        overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                    />
                     <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">{{ form.errors.type }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="color" value="Color" />
-                    <TextInput id="color" v-model="form.color" type="color" class="mt-1 block w-full h-10 p-1" />
+                    <div class="flex items-center gap-3 mt-1">
+                        <ColorPicker v-model="pickerColor" format="hex" appendTo="body" panelClass="!z-[9999]" class="border-gray-300 dark:border-[#404040]" />
+                        <InputText id="color" v-model="form.color" type="text" class="flex-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="#000000" />
+                    </div>
                     <div v-if="form.errors.color" class="text-red-500 text-sm mt-1">{{ form.errors.color }}</div>
                 </div>
 

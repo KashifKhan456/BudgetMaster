@@ -61,7 +61,7 @@ const openModal = (goal = null) => {
         editingGoal.value = goal;
         form.name = goal.name;
         form.target_amount = goal.target_amount;
-        form.target_date = goal.target_date;
+        form.target_date = new Date(goal.target_date);
     } else {
         editingGoal.value = null;
         form.reset();
@@ -202,19 +202,42 @@ const calculateProgress = (current, target) => {
 
                 <div class="mt-6">
                     <InputLabel for="name" value="Goal Name" />
-                    <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="e.g. New Car" />
+                    <InputText 
+                        id="name" 
+                        v-model="form.name" 
+                        type="text" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        placeholder="e.g. New Car" 
+                    />
                     <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="target_amount" value="Target Amount" />
-                    <TextInput id="target_amount" v-model="form.target_amount" type="number" step="0.01" class="mt-1 block w-full" placeholder="0.00" />
+                    <InputText 
+                        id="target_amount" 
+                        v-model="form.target_amount" 
+                        type="number" 
+                        step="0.01" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        placeholder="0.00" 
+                    />
                     <div v-if="form.errors.target_amount" class="text-red-500 text-sm mt-1">{{ form.errors.target_amount }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="target_date" value="Target Date" />
-                    <DatePicker id="target_date" v-model="form.target_date" dateFormat="yy-mm-dd" showIcon showOnFocus class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                    <DatePicker 
+                        id="target_date" 
+                        v-model="form.target_date" 
+                        dateFormat="yy-mm-dd" 
+                        showIcon 
+                        showOnFocus 
+                        appendTo="body" 
+                        panelClass="!z-[9999]"
+                        class="mt-1 w-full" 
+                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" 
+                    />
                     <div v-if="form.errors.target_date" class="text-red-500 text-sm mt-1">{{ form.errors.target_date }}</div>
                 </div>
 
@@ -236,7 +259,14 @@ const calculateProgress = (current, target) => {
 
                 <div class="mt-6">
                     <InputLabel for="add_amount" value="Amount to Add" />
-                    <TextInput id="add_amount" v-model="addFundsForm.add_amount" type="number" step="0.01" class="mt-1 block w-full" placeholder="0.00" />
+                    <InputText 
+                        id="add_amount" 
+                        v-model="addFundsForm.add_amount" 
+                        type="number" 
+                        step="0.01" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        placeholder="0.00" 
+                    />
                     <div v-if="addFundsForm.errors.add_amount" class="text-red-500 text-sm mt-1">{{ addFundsForm.errors.add_amount }}</div>
                 </div>
 

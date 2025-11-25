@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Notifications\NewExpenseRequest;
+use App\Notifications\ExpenseRequestStatusUpdated;
 
 class ExpenseRequestController extends Controller
 {
@@ -50,7 +52,13 @@ class ExpenseRequestController extends Controller
             'description' => 'nullable|string|max:255',
         ]);
 
-        $request->user()->expenseRequests()->create($validated);
+        $expenseRequest = $request->user()->expenseRequests()->create($validated);
+
+        // Notify the budget owner
+        $budget = Budget::find($validated['budget_id']);
+        if ($budget->user_id !== $request->user()->id) {
+            $budget->user->notify(new NewExpenseRequest($expenseRequest));
+        }
 
         return redirect()->back()->with('success', 'Expense request submitted.');
     }
@@ -86,6 +94,8 @@ class ExpenseRequestController extends Controller
                     'description' => $expenseRequest->description ?? 'Approved Expense Request',
                 ]);
             }
+
+            $expenseRequest->user->notify(new ExpenseRequestStatusUpdated($expenseRequest, $validated['status'], Auth::user()->name));
         });
 
         return redirect()->back()->with('success', 'Request ' . $validated['status'] . '.');

@@ -41,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(['middleware' => ['can:manage users']], function () {
         Route::resource('users', UserController::class);
     });
+
+    Route::put('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::put('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });
 
 Route::middleware('auth')->group(function () {

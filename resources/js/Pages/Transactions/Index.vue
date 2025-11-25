@@ -72,7 +72,7 @@ const openModal = (transaction = null) => {
         form.category_id = transaction.category_id;
         form.amount = transaction.amount;
         form.type = transaction.type;
-        form.date = transaction.date;
+        form.date = new Date(transaction.date);
         form.description = transaction.description;
     } else {
         editingTransaction.value = null;
@@ -261,31 +261,73 @@ const deleteTransaction = (id) => {
 
                 <div class="mt-6">
                     <InputLabel for="type" value="Type" />
-                    <Select id="type" v-model="form.type" :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" optionLabel="label" optionValue="value" class="mt-1 w-full" />
+                    <Select 
+                        id="type" 
+                        v-model="form.type" 
+                        :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        appendTo="body"
+                        overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                    />
                     <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">{{ form.errors.type }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="amount" value="Amount" />
-                    <InputText id="amount" v-model="form.amount" type="number" step="0.01" class="mt-1 block w-full" placeholder="0.00" />
+                    <InputText 
+                        id="amount" 
+                        v-model="form.amount" 
+                        type="number" 
+                        step="0.01" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        placeholder="0.00" 
+                    />
                     <div v-if="form.errors.amount" class="text-red-500 text-sm mt-1">{{ form.errors.amount }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="category_id" value="Category" />
-                    <Select id="category_id" v-model="form.category_id" :options="categories" optionLabel="name" optionValue="id" placeholder="Select Category" class="mt-1 w-full" />
+                    <Select 
+                        id="category_id" 
+                        v-model="form.category_id" 
+                        :options="categories" 
+                        optionLabel="name" 
+                        optionValue="id" 
+                        placeholder="Select Category" 
+                        appendTo="body"
+                        overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                    />
                     <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="date" value="Date" />
-                    <DatePicker id="date" v-model="form.date" dateFormat="yy-mm-dd" showIcon showOnFocus class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                    <DatePicker 
+                        id="date" 
+                        v-model="form.date" 
+                        dateFormat="yy-mm-dd" 
+                        showIcon 
+                        showOnFocus 
+                        appendTo="body" 
+                        panelClass="!z-[9999]"
+                        class="mt-1 w-full" 
+                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" 
+                    />
                     <div v-if="form.errors.date" class="text-red-500 text-sm mt-1">{{ form.errors.date }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="description" value="Description" />
-                    <InputText id="description" v-model="form.description" type="text" class="mt-1 block w-full" placeholder="Description (optional)" />
+                    <InputText 
+                        id="description" 
+                        v-model="form.description" 
+                        type="text" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        placeholder="Description (optional)" 
+                    />
                     <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">{{ form.errors.description }}</div>
                 </div>
 

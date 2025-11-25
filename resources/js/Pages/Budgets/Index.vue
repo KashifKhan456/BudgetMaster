@@ -79,8 +79,8 @@ const openModal = (budget = null) => {
         form.category_id = budget.category_id;
         form.amount = budget.amount;
         form.period = budget.period;
-        form.start_date = budget.start_date;
-        form.end_date = budget.end_date;
+        form.start_date = new Date(budget.start_date);
+        form.end_date = new Date(budget.end_date);
     } else {
         editingBudget.value = null;
         form.reset();
@@ -291,12 +291,12 @@ const deleteBudget = (id) => {
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <div>
                         <InputLabel for="start_date" value="Start Date" />
-                        <DatePicker id="start_date" v-model="form.start_date" dateFormat="yy-mm-dd" showIcon showOnFocus class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                        <DatePicker id="start_date" v-model="form.start_date" dateFormat="yy-mm-dd" showIcon showOnFocus appendTo="body" class="mt-1 w-full" inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
                         <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date }}</div>
                     </div>
                     <div>
                         <InputLabel for="end_date" value="End Date" />
-                        <DatePicker id="end_date" v-model="form.end_date" dateFormat="yy-mm-dd" showIcon showOnFocus class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                        <DatePicker id="end_date" v-model="form.end_date" dateFormat="yy-mm-dd" showIcon showOnFocus appendTo="body" class="mt-1 w-full" inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
                         <div v-if="form.errors.end_date" class="text-red-500 text-sm mt-1">{{ form.errors.end_date }}</div>
                     </div>
                 </div>

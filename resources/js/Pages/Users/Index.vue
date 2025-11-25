@@ -3,12 +3,18 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
 import { formatDate } from '@/Utils/date';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import Modal from '@/Components/Modal.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
     users: Array,
+    roles: Array,
     filters: Object,
 });
 
@@ -39,6 +45,52 @@ const deleteUser = (id) => {
         useForm({}).delete(route('users.destroy', id));
     }
 };
+
+const showModal = ref(false);
+const editingUser = ref(null);
+
+const form = useForm({
+    name: '',
+    email: '',
+    role: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const openModal = (user = null) => {
+    if (user) {
+        editingUser.value = user;
+        form.name = user.name;
+        form.email = user.email;
+        // Assuming user.roles is an array of strings like ['admin']
+        form.role = user.roles && user.roles.length > 0 ? user.roles[0] : '';
+        form.password = '';
+        form.password_confirmation = '';
+    } else {
+        editingUser.value = null;
+        form.reset();
+        form.role = ''; // Reset role explicitly
+    }
+    showModal.value = true;
+};
+
+const closeModal = () => {
+    showModal.value = false;
+    form.reset();
+    editingUser.value = null;
+};
+
+const submit = () => {
+    if (editingUser.value) {
+        form.put(route('users.update', editingUser.value.id), {
+            onSuccess: () => closeModal(),
+        });
+    } else {
+        form.post(route('users.store'), {
+            onSuccess: () => closeModal(),
+        });
+    }
+};
 </script>
 
 <template>
@@ -48,9 +100,9 @@ const deleteUser = (id) => {
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Users</h2>
-                <Link :href="route('users.create')" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                <PrimaryButton @click="openModal()">
                     Add User
-                </Link>
+                </PrimaryButton>
             </div>
         </template>
 
@@ -99,7 +151,7 @@ const deleteUser = (id) => {
                                         </td>
                                         <td class="px-6 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ formatDate(user.created_at) }}</td>
                                         <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link :href="route('users.edit', user.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</Link>
+                                            <button @click="openModal(user)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
                                             <button @click="deleteUser(user.id)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
                                         </td>
                                     </tr>
@@ -115,5 +167,84 @@ const deleteUser = (id) => {
                 </div>
             </div>
         </div>
+
+        <Modal :show="showModal" @close="closeModal">
+            <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    {{ editingUser ? 'Edit User' : 'Add User' }}
+                </h2>
+
+                <div class="mt-6">
+                    <InputLabel for="name" value="Name" />
+                    <InputText 
+                        id="name" 
+                        v-model="form.name" 
+                        type="text" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        required 
+                        autofocus 
+                    />
+                    <InputError class="mt-2" :message="form.errors.name" />
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="email" value="Email" />
+                    <InputText 
+                        id="email" 
+                        v-model="form.email" 
+                        type="email" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        required 
+                    />
+                    <InputError class="mt-2" :message="form.errors.email" />
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="role" value="Role" />
+                    <Select 
+                        id="role" 
+                        v-model="form.role" 
+                        :options="roles" 
+                        placeholder="Select a role" 
+                        appendTo="body"
+                        overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        required
+                    />
+                    <InputError class="mt-2" :message="form.errors.role" />
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="password" value="Password (Leave blank to keep current)" />
+                    <InputText 
+                        id="password" 
+                        v-model="form.password" 
+                        type="password" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        autocomplete="new-password" 
+                    />
+                    <InputError class="mt-2" :message="form.errors.password" />
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="password_confirmation" value="Confirm Password" />
+                    <InputText 
+                        id="password_confirmation" 
+                        v-model="form.password_confirmation" 
+                        type="password" 
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
+                        autocomplete="new-password" 
+                    />
+                    <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <SecondaryButton @click="closeModal">Cancel</SecondaryButton>
+                    <PrimaryButton class="ml-3" @click="submit" :disabled="form.processing">
+                        {{ editingUser ? 'Update User' : 'Add User' }}
+                    </PrimaryButton>
+                </div>
+            </div>
+        </Modal>
     </AuthenticatedLayout>
 </template>
