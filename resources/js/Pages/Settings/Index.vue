@@ -12,6 +12,7 @@ const user = usePage().props.auth.user;
 
 const form = useForm({
     currency: user.currency || 'USD',
+    language: user.language || 'en',
 });
 
 const currencyOptions = computed(() => {
@@ -21,10 +22,22 @@ const currencyOptions = computed(() => {
     }));
 });
 
+const languageOptions = [
+    { label: 'English', code: 'en' },
+    { label: 'Spanish', code: 'es' },
+    { label: 'Urdu', code: 'ur' }
+];
+
 const submit = () => {
     form.patch(route('settings.update'), {
         preserveScroll: true,
         showProgress: false,
+        onSuccess: () => {
+            // Reload to apply language changes if any
+            if (form.language !== user.language) {
+                window.location.reload();
+            }
+        }
     });
 };
 </script>
@@ -69,6 +82,22 @@ const submit = () => {
                                     }" />
 
                                 <InputError class="mt-2" :message="form.errors.currency" />
+                            </div>
+
+                            <div>
+                                <InputLabel for="language" value="Language" />
+
+                                <Select id="language" v-model="form.language" :options="languageOptions"
+                                    optionLabel="label" optionValue="code" placeholder="Select a Language"
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    :pt="{
+                                        root: { class: 'dark:bg-[#262626] dark:border-[#404040]' },
+                                        input: { class: 'dark:text-gray-300' },
+                                        panel: { class: 'dark:bg-[#262626] dark:border-[#404040]' },
+                                        item: { class: 'dark:text-gray-300 hover:dark:bg-[#404040] dark:focus:bg-[#404040]' },
+                                    }" />
+
+                                <InputError class="mt-2" :message="form.errors.language" />
                             </div>
 
                             <div class="flex items-center gap-4">

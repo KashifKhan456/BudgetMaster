@@ -17,6 +17,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'currency' => ['required', 'string', 'max:3'],
+            'language' => ['required', 'string', 'in:en,es,ur'],
         ]);
 
         $request->user()->update($validated);

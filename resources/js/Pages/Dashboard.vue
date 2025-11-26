@@ -97,7 +97,7 @@ const chartOptions = {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Dashboard</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ $t('Dashboard') }}</h2>
         </template>
 
         <div class="py-12">
@@ -105,22 +105,22 @@ const chartOptions = {
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">Total Income</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">{{ $t('Total Income') }}</div>
                         <div class="text-2xl font-bold text-green-500">{{ formatCurrency(stats.income, currency) }}
                         </div>
                     </div>
                     <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">Total Expenses</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">{{ $t('Total Expenses') }}</div>
                         <div class="text-2xl font-bold text-red-500">{{ formatCurrency(stats.expenses, currency) }}
                         </div>
                     </div>
                     <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">Total Budget</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">{{ $t('Total Budget') }}</div>
                         <div class="text-2xl font-bold text-blue-500">{{ formatCurrency(stats.totalBudget, currency) }}
                         </div>
                     </div>
                     <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm">Remaining</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm">{{ $t('Remaining') }}</div>
                         <div class="text-2xl font-bold"
                             :class="stats.remainingBudget >= 0 ? 'text-green-500' : 'text-red-500'">
                             {{ formatCurrency(stats.remainingBudget, currency) }}
@@ -212,8 +212,8 @@ const chartOptions = {
                                     <td class="px-4 py-2 text-sm font-medium"
                                         :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
                                         {{ transaction.type === 'income' ? '+' : '-' }}{{
-                                        formatCurrency(transaction.amount,
-                                        currency) }}
+                                            formatCurrency(transaction.amount,
+                                                currency) }}
                                     </td>
                                 </tr>
                                 <tr v-if="recentTransactions.length === 0">

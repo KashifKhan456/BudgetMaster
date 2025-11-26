@@ -77,6 +77,9 @@ watch(() => page.props.flash, (flash) => {
                                 <NavLink :href="route('goals.index')" :active="route().current('goals.*')">
                                     Goals
                                 </NavLink>
+                                <NavLink :href="route('reports.index')" :active="route().current('reports.*')">
+                                    Reports
+                                </NavLink>
                                 <NavLink :href="route('expense-requests.index')"
                                     :active="route().current('expense-requests.*')">
                                     Requests
@@ -168,6 +171,9 @@ watch(() => page.props.flash, (flash) => {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('goals.index')" :active="route().current('goals.*')">
                             Goals
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('reports.index')" :active="route().current('reports.*')">
+                            Reports
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('expense-requests.index')"
                             :active="route().current('expense-requests.*')">
