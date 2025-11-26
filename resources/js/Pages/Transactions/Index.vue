@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -9,6 +9,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
+import { formatCurrency } from '@/Utils/currency';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import InputText from 'primevue/inputtext';
@@ -23,6 +24,9 @@ const props = defineProps({
     categories: Array,
     filters: Object,
 });
+
+const user = usePage().props.auth.user;
+const currency = user.currency || 'USD';
 
 const filters = ref({
     search: props.filters?.search || '',
@@ -292,7 +296,9 @@ const deleteTransaction = (id) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold"
                                             :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
-                                            {{ transaction.type === 'income' ? '+' : '-' }}${{ transaction.amount }}
+                                            {{ transaction.type === 'income' ? '+' : '-' }}{{
+                                            formatCurrency(transaction.amount,
+                                            currency) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="openModal(transaction)"
@@ -356,7 +362,7 @@ const deleteTransaction = (id) => {
                             optionValue="id" placeholder="Select Category" appendTo="body" overlayClass="!z-[9999]"
                             class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                         <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id
-                            }}
+                        }}
                         </div>
                     </div>
 
@@ -389,7 +395,9 @@ const deleteTransaction = (id) => {
                             </button>
                             <div class="text-sm"
                                 :class="{ 'text-red-500': splitTotal > form.amount, 'text-green-500': splitTotal <= form.amount }">
-                                Total: ${{ splitTotal.toFixed(2) }} / ${{ Number(form.amount).toFixed(2) }}
+                                Total: {{ formatCurrency(splitTotal, currency) }} / {{
+                                    formatCurrency(Number(form.amount),
+                                currency) }}
                             </div>
                         </div>
                         <div v-if="splitTotal > form.amount" class="text-red-500 text-xs text-right">

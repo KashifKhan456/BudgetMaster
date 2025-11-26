@@ -43,8 +43,7 @@ watch(() => page.props.flash, (flash) => {
     <div>
         <div class="min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300">
             <nav
-                class="border-b border-slate-200 dark:border-[#333333] bg-white dark:bg-[#1a1a1a] transition-colors duration-300"
-            >
+                class="border-b border-slate-200 dark:border-[#333333] bg-white dark:bg-[#1a1a1a] transition-colors duration-300">
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
@@ -52,63 +51,38 @@ watch(() => page.props.flash, (flash) => {
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
-                                    />
+                                <ApplicationLogo
+                                    class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                                 </Link>
                             </div>
 
                             <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
-                                <NavLink
-                                    :href="route('categories.index')"
-                                    :active="route().current('categories.*')"
-                                >
+                                <NavLink :href="route('categories.index')" :active="route().current('categories.*')">
                                     Categories
                                 </NavLink>
-                                <NavLink
-                                    :href="route('budgets.index')"
-                                    :active="route().current('budgets.*')"
-                                >
+                                <NavLink :href="route('budgets.index')" :active="route().current('budgets.*')">
                                     Budgets
                                 </NavLink>
-                                <NavLink
-                                    :href="route('transactions.index')"
-                                    :active="route().current('transactions.*')"
-                                >
+                                <NavLink :href="route('transactions.index')"
+                                    :active="route().current('transactions.*')">
                                     Transactions
                                 </NavLink>
-                                <NavLink
-                                    :href="route('recurring.index')"
-                                    :active="route().current('recurring.*')"
-                                >
+                                <NavLink :href="route('recurring.index')" :active="route().current('recurring.*')">
                                     Recurring
                                 </NavLink>
-                                <NavLink
-                                    :href="route('goals.index')"
-                                    :active="route().current('goals.*')"
-                                >
+                                <NavLink :href="route('goals.index')" :active="route().current('goals.*')">
                                     Goals
                                 </NavLink>
-                                <NavLink
-                                    :href="route('expense-requests.index')"
-                                    :active="route().current('expense-requests.*')"
-                                >
+                                <NavLink :href="route('expense-requests.index')"
+                                    :active="route().current('expense-requests.*')">
                                     Requests
                                 </NavLink>
-                                <NavLink
-                                    v-if="$page.props.auth.can.manage_users"
-                                    :href="route('users.index')"
-                                    :active="route().current('users.*')"
-                                >
+                                <NavLink v-if="$page.props.auth.can.manage_users" :href="route('users.index')"
+                                    :active="route().current('users.*')">
                                     Users
                                 </NavLink>
                             </div>
@@ -126,39 +100,28 @@ watch(() => page.props.flash, (flash) => {
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-[#1a1a1a] dark:text-gray-400 dark:hover:text-gray-300"
-                                            >
+                                            <button type="button"
+                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-[#1a1a1a] dark:text-gray-400 dark:hover:text-gray-300">
                                                 {{ $page.props.auth.user.name }}
 
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
+                                                <svg class="-me-0.5 ms-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
                                                         d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
+                                                        clip-rule="evenodd" />
                                                 </svg>
                                             </button>
                                         </span>
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
+                                        <DropdownLink :href="route('profile.edit')">
                                             Profile
                                         </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
+                                        <DropdownLink :href="route('settings.index')">
+                                            Settings
+                                        </DropdownLink>
+                                        <DropdownLink :href="route('logout')" method="post" as="button">
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -168,13 +131,8 @@ watch(() => page.props.flash, (flash) => {
 
                         <!-- Hamburger -->
                         <div class="-me-2 flex items-center sm:hidden">
-                            <Button
-                                icon="pi pi-bars"
-                                @click="showingNavigationDropdown = true"
-                                text
-                                severity="secondary"
-                                aria-label="Menu"
-                            />
+                            <Button icon="pi pi-bars" @click="showingNavigationDropdown = true" text
+                                severity="secondary" aria-label="Menu" />
                         </div>
                     </div>
                 </div>
@@ -183,7 +141,7 @@ watch(() => page.props.flash, (flash) => {
                 <Drawer v-model:visible="showingNavigationDropdown" header="Menu" position="right" class="w-64">
                     <div class="flex flex-col space-y-4">
                         <!-- User Info in Drawer -->
-                         <div class="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700">
+                        <div class="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700">
                             <div class="text-lg font-bold text-gray-800 dark:text-gray-200">
                                 {{ $page.props.auth.user.name }}
                             </div>
@@ -192,70 +150,47 @@ watch(() => page.props.flash, (flash) => {
                             </div>
                         </div>
 
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
+                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('categories.index')"
-                            :active="route().current('categories.*')"
-                        >
+                        <ResponsiveNavLink :href="route('categories.index')" :active="route().current('categories.*')">
                             Categories
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('budgets.index')"
-                            :active="route().current('budgets.*')"
-                        >
+                        <ResponsiveNavLink :href="route('budgets.index')" :active="route().current('budgets.*')">
                             Budgets
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('transactions.index')"
-                            :active="route().current('transactions.*')"
-                        >
+                        <ResponsiveNavLink :href="route('transactions.index')"
+                            :active="route().current('transactions.*')">
                             Transactions
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('recurring.index')"
-                            :active="route().current('recurring.*')"
-                        >
+                        <ResponsiveNavLink :href="route('recurring.index')" :active="route().current('recurring.*')">
                             Recurring
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('goals.index')"
-                            :active="route().current('goals.*')"
-                        >
+                        <ResponsiveNavLink :href="route('goals.index')" :active="route().current('goals.*')">
                             Goals
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('expense-requests.index')"
-                            :active="route().current('expense-requests.*')"
-                        >
+                        <ResponsiveNavLink :href="route('expense-requests.index')"
+                            :active="route().current('expense-requests.*')">
                             Requests
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            v-if="$page.props.auth.can.manage_users"
-                            :href="route('users.index')"
-                            :active="route().current('users.*')"
-                        >
+                        <ResponsiveNavLink v-if="$page.props.auth.can.manage_users" :href="route('users.index')"
+                            :active="route().current('users.*')">
                             Users
                         </ResponsiveNavLink>
 
                         <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
-                             <ResponsiveNavLink :href="route('profile.edit')">
+                            <ResponsiveNavLink :href="route('profile.edit')">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
+                            <ResponsiveNavLink :href="route('settings.index')">
+                                Settings
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
-                        
-                         <div class="mt-4 flex items-center justify-between">
+
+                        <div class="mt-4 flex items-center justify-between">
                             <span class="text-sm text-gray-600 dark:text-gray-400">Theme</span>
                             <ThemeToggle />
                         </div>
@@ -264,10 +199,7 @@ watch(() => page.props.flash, (flash) => {
             </nav>
 
             <!-- Page Heading -->
-            <header
-                class="bg-white shadow dark:bg-[#1a1a1a] transition-colors duration-300"
-                v-if="$slots.header"
-            >
+            <header class="bg-white shadow dark:bg-[#1a1a1a] transition-colors duration-300" v-if="$slots.header">
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>

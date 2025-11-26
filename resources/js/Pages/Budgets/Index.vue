@@ -9,6 +9,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
+import { formatCurrency } from '@/Utils/currency';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import InputText from 'primevue/inputtext';
@@ -24,6 +25,7 @@ const props = defineProps({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const currency = computed(() => user.value.currency || 'USD');
 
 const filters = ref({
     search: props.filters?.search || '',
@@ -246,7 +248,9 @@ const deleteBudget = (id) => {
                                                 Shared
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-bold">${{ budget.amount }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-bold">{{
+                                            formatCurrency(budget.amount,
+                                            currency) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap capitalize">{{ budget.period }}</td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -320,7 +324,7 @@ const deleteBudget = (id) => {
                             appendTo="body" class="mt-1 w-full"
                             inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
                         <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date
-                            }}</div>
+                        }}</div>
                     </div>
                     <div>
                         <InputLabel for="end_date" value="End Date" />

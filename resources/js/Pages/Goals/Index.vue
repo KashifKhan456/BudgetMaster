@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -9,6 +9,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
+import { formatCurrency } from '@/Utils/currency';
 import InputText from 'primevue/inputtext';
 
 import DatePicker from 'primevue/datepicker';
@@ -22,6 +23,9 @@ const props = defineProps({
     goals: Object,
     filters: Object,
 });
+
+const user = usePage().props.auth.user;
+const currency = user.currency || 'USD';
 
 const filters = ref({
     search: props.filters?.search || '',
@@ -198,8 +202,8 @@ const calculateProgress = (current, target) => {
                             </div>
 
                             <div class="mb-2 flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>${{ goal.current_amount }} saved</span>
-                                <span>Target: ${{ goal.target_amount }}</span>
+                                <span>{{ formatCurrency(goal.current_amount, currency) }} saved</span>
+                                <span>Target: {{ formatCurrency(goal.target_amount, currency) }}</span>
                             </div>
 
                             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-[#1a1a1a] mb-4">
@@ -253,7 +257,7 @@ const calculateProgress = (current, target) => {
                         class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                         placeholder="0.00" />
                     <div v-if="form.errors.target_amount" class="text-red-500 text-sm mt-1">{{ form.errors.target_amount
-                    }}
+                        }}
                     </div>
                 </div>
 

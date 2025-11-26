@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -9,6 +9,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
+import { formatCurrency } from '@/Utils/currency';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 
@@ -22,6 +23,9 @@ const props = defineProps({
     categories: Array,
     filters: Object,
 });
+
+const user = usePage().props.auth.user;
+const currency = user.currency || 'USD';
 
 const filters = ref({
     search: props.filters?.search || '',
@@ -195,13 +199,15 @@ const deleteTransaction = (id) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold"
                                             :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
-                                            {{ transaction.type === 'income' ? '+' : '-' }}${{ transaction.amount }}
+                                            {{ transaction.type === 'income' ? '+' : '-' }}{{
+                                            formatCurrency(transaction.amount,
+                                            currency) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap capitalize">{{ transaction.interval }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">{{
                                             formatDate(transaction.next_run_date)
-                                        }}</td>
+                                            }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button @click="openModal(transaction)"
                                                 class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
@@ -295,7 +301,7 @@ const deleteTransaction = (id) => {
                     ]" optionLabel="label" optionValue="value" appendTo="body" overlayClass="!z-[9999]"
                         class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                     <div v-if="form.errors.reminder_days" class="text-red-500 text-sm mt-1">{{ form.errors.reminder_days
-                    }}
+                        }}
                     </div>
                 </div>
 
