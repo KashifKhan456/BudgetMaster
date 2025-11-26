@@ -12,11 +12,12 @@ import { formatDate } from '@/Utils/date';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
 import InputText from 'primevue/inputtext';
+import Pagination from '@/Components/Pagination.vue';
 
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
-    budgets: Array,
+    budgets: Object,
     categories: Array,
     filters: Object,
 });
@@ -156,6 +157,7 @@ const deleteBudget = (id) => {
 </script>
 
 <template>
+
     <Head title="Budgets" />
 
     <AuthenticatedLayout>
@@ -174,82 +176,101 @@ const deleteBudget = (id) => {
                         <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <InputLabel for="filter_search" value="Search" />
-                                <InputText 
-                                    id="filter_search" 
-                                    v-model="filters.search" 
-                                    type="text" 
-                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                                    placeholder="Search category..." 
-                                />
+                                <InputText id="filter_search" v-model="filters.search" type="text"
+                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    placeholder="Search category..." />
                             </div>
                             <div>
                                 <InputLabel for="filter_category" value="Category" />
-                                <Select 
-                                    id="filter_category" 
-                                    v-model="filters.category_id" 
-                                    :options="categories" 
-                                    optionLabel="name" 
-                                    optionValue="id" 
-                                    placeholder="All Categories" 
-                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                                    showClear 
-                                />
+                                <Select id="filter_category" v-model="filters.category_id" :options="categories"
+                                    optionLabel="name" optionValue="id" placeholder="All Categories"
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    showClear />
                             </div>
                             <div>
                                 <InputLabel for="filter_start_date" value="Start Date" />
-                                <DatePicker id="filter_start_date" v-model="filters.start_date" dateFormat="yy-mm-dd" showIcon showClear :minDate="null" class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                                <DatePicker id="filter_start_date" v-model="filters.start_date" dateFormat="yy-mm-dd"
+                                    showIcon showClear :minDate="null" class="mt-1 w-full"
+                                    inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                             </div>
                             <div>
                                 <InputLabel for="filter_end_date" value="End Date" />
-                                <DatePicker id="filter_end_date" v-model="filters.end_date" dateFormat="yy-mm-dd" showIcon showClear :minDate="null" class="mt-1 w-full" inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                                <DatePicker id="filter_end_date" v-model="filters.end_date" dateFormat="yy-mm-dd"
+                                    showIcon showClear :minDate="null" class="mt-1 w-full"
+                                    inputClass="w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                             </div>
                         </div>
 
                         <div class="overflow-x-auto relative">
-                            <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
-                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <div v-if="loading"
+                                class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
                                 </svg>
                             </div>
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead>
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Period</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dates</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Category</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Amount</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Period</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Dates</th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-[#1a1a1a] divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="budget in budgets" :key="budget.id">
+                                    <tr v-for="budget in budgets.data" :key="budget.id">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :style="{ backgroundColor: budget.category?.color + '20', color: budget.category?.color }">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                :style="{ backgroundColor: budget.category?.color + '20', color: budget.category?.color }">
                                                 {{ budget.category?.name }}
                                             </span>
-                                            <span v-if="budget.user_id !== user.id" class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            <span v-if="budget.user_id !== user.id"
+                                                class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                                 Shared
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap font-bold">${{ budget.amount }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap capitalize">{{ budget.period }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ formatDate(budget.start_date) }} - {{ formatDate(budget.end_date) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button v-if="budget.user_id === user.id" @click="openShareModal(budget)" class="text-green-600 dark:text-green-400 hover:text-green-900 mr-4">Share</button>
-                                            <button @click="openModal(budget)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
-                                            <button @click="deleteBudget(budget.id)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
+                                            <button v-if="budget.user_id === user.id" @click="openShareModal(budget)"
+                                                class="text-green-600 dark:text-green-400 hover:text-green-900 mr-4">Share</button>
+                                            <button @click="openModal(budget)"
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
+                                            <button @click="deleteBudget(budget.id)"
+                                                class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
                                         </td>
                                     </tr>
-                                    <tr v-if="budgets.length === 0">
+                                    <tr v-if="budgets.data.length === 0">
                                         <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                             No records found.
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-6">
+                            <Pagination :links="budgets.links" />
                         </div>
                     </div>
                 </div>
@@ -264,24 +285,28 @@ const deleteBudget = (id) => {
 
                 <div class="mt-6">
                     <InputLabel for="category_id" value="Category" />
-                    <select id="category_id" v-model="form.category_id" class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                    <select id="category_id" v-model="form.category_id"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                         <option value="" disabled>Select Category</option>
                         <option v-for="category in categories" :key="category.id" :value="category.id">
                             {{ category.name }}
                         </option>
                     </select>
-                    <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
+                    <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}
+                    </div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="amount" value="Amount" />
-                    <TextInput id="amount" v-model="form.amount" type="number" step="0.01" class="mt-1 block w-full" placeholder="0.00" />
+                    <TextInput id="amount" v-model="form.amount" type="number" step="0.01" class="mt-1 block w-full"
+                        placeholder="0.00" />
                     <div v-if="form.errors.amount" class="text-red-500 text-sm mt-1">{{ form.errors.amount }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="period" value="Period" />
-                    <select id="period" v-model="form.period" class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                    <select id="period" v-model="form.period"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                         <option value="month">Monthly</option>
                         <option value="year">Yearly</option>
                     </select>
@@ -291,13 +316,19 @@ const deleteBudget = (id) => {
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <div>
                         <InputLabel for="start_date" value="Start Date" />
-                        <DatePicker id="start_date" v-model="form.start_date" dateFormat="yy-mm-dd" showIcon showOnFocus appendTo="body" class="mt-1 w-full" inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
-                        <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date }}</div>
+                        <DatePicker id="start_date" v-model="form.start_date" dateFormat="yy-mm-dd" showIcon showOnFocus
+                            appendTo="body" class="mt-1 w-full"
+                            inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
+                        <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date
+                            }}</div>
                     </div>
                     <div>
                         <InputLabel for="end_date" value="End Date" />
-                        <DatePicker id="end_date" v-model="form.end_date" dateFormat="yy-mm-dd" showIcon showOnFocus appendTo="body" class="mt-1 w-full" inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
-                        <div v-if="form.errors.end_date" class="text-red-500 text-sm mt-1">{{ form.errors.end_date }}</div>
+                        <DatePicker id="end_date" v-model="form.end_date" dateFormat="yy-mm-dd" showIcon showOnFocus
+                            appendTo="body" class="mt-1 w-full"
+                            inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
+                        <div v-if="form.errors.end_date" class="text-red-500 text-sm mt-1">{{ form.errors.end_date }}
+                        </div>
                     </div>
                 </div>
 
@@ -317,8 +348,10 @@ const deleteBudget = (id) => {
 
                 <div class="mt-6">
                     <InputLabel for="share_email" value="User Email" />
-                    <TextInput id="share_email" v-model="shareForm.email" type="email" class="mt-1 block w-full" placeholder="user@example.com" />
-                    <div v-if="shareForm.errors.email" class="text-red-500 text-sm mt-1">{{ shareForm.errors.email }}</div>
+                    <TextInput id="share_email" v-model="shareForm.email" type="email" class="mt-1 block w-full"
+                        placeholder="user@example.com" />
+                    <div v-if="shareForm.errors.email" class="text-red-500 text-sm mt-1">{{ shareForm.errors.email }}
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -331,11 +364,13 @@ const deleteBudget = (id) => {
                 <div class="mt-8" v-if="sharingBudget?.users?.length > 0">
                     <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Shared With</h3>
                     <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <li v-for="user in sharingBudget.users" :key="user.id" class="py-3 flex justify-between items-center">
+                        <li v-for="user in sharingBudget.users" :key="user.id"
+                            class="py-3 flex justify-between items-center">
                             <div class="text-sm text-gray-900 dark:text-gray-100">
                                 {{ user.name }} ({{ user.email }})
                             </div>
-                            <button @click="removeUser(user.id)" class="text-red-600 dark:text-red-400 hover:text-red-900 text-sm">Remove</button>
+                            <button @click="removeUser(user.id)"
+                                class="text-red-600 dark:text-red-400 hover:text-red-900 text-sm">Remove</button>
                         </li>
                     </ul>
                 </div>

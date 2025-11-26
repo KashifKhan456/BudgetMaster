@@ -10,12 +10,16 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
 import InputText from 'primevue/inputtext';
+
 import DatePicker from 'primevue/datepicker';
+import Pagination from '@/Components/Pagination.vue';
+import confetti from 'canvas-confetti';
+import Swal from 'sweetalert2';
 
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
-    goals: Array,
+    goals: Object,
     filters: Object,
 });
 
@@ -103,8 +107,29 @@ const submit = () => {
 
 const submitAddFunds = () => {
     if (addingFundsGoal.value) {
+        const current = parseFloat(addingFundsGoal.value.current_amount);
+        const added = parseFloat(addFundsForm.add_amount);
+        const target = parseFloat(addingFundsGoal.value.target_amount);
+
         addFundsForm.put(route('goals.update', addingFundsGoal.value.id), {
-            onSuccess: () => closeModal(),
+            onSuccess: () => {
+                if (current + added >= target) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    Swal.fire({
+                        title: 'Goal Achieved!',
+                        text: `Congratulations! You have reached your goal for ${addingFundsGoal.value.name}!`,
+                        icon: 'success',
+                        confirmButtonText: 'Awesome!',
+                        background: document.documentElement.classList.contains('dark') ? '#1a1a1a' : '#ffffff',
+                        color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#545454'
+                    });
+                }
+                closeModal();
+            },
         });
     }
 };
@@ -124,6 +149,7 @@ const calculateProgress = (current, target) => {
 </script>
 
 <template>
+
     <Head title="Savings Goals" />
 
     <AuthenticatedLayout>
@@ -140,57 +166,70 @@ const calculateProgress = (current, target) => {
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <InputLabel for="filter_search" value="Search" />
-                        <InputText 
-                            id="filter_search" 
-                            v-model="filters.search" 
-                            type="text" 
-                            class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                            placeholder="Search goals..." 
-                        />
+                        <InputText id="filter_search" v-model="filters.search" type="text"
+                            class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            placeholder="Search goals..." />
                     </div>
                 </div>
 
                 <div class="relative">
-                    <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
-                        <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <div v-if="loading"
+                        class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                        <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div v-for="goal in goals" :key="goal.id" class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ goal.name }}</h3>
-                            <div class="flex space-x-2">
-                                <button @click="openModal(goal)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 text-sm">Edit</button>
-                                <button @click="deleteGoal(goal.id)" class="text-red-600 dark:text-red-400 hover:text-red-900 text-sm">Delete</button>
+                        <div v-for="goal in goals.data" :key="goal.id"
+                            class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ goal.name }}</h3>
+                                <div class="flex space-x-2">
+                                    <button @click="openModal(goal)"
+                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 text-sm">Edit</button>
+                                    <button @click="deleteGoal(goal.id)"
+                                        class="text-red-600 dark:text-red-400 hover:text-red-900 text-sm">Delete</button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-2 flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                            <span>${{ goal.current_amount }} saved</span>
-                            <span>Target: ${{ goal.target_amount }}</span>
-                        </div>
+                            <div class="mb-2 flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                <span>${{ goal.current_amount }} saved</span>
+                                <span>Target: ${{ goal.target_amount }}</span>
+                            </div>
 
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-[#1a1a1a] mb-4">
-                            <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: calculateProgress(goal.current_amount, goal.target_amount) + '%' }"></div>
-                        </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-[#1a1a1a] mb-4">
+                                <div class="bg-blue-600 h-2.5 rounded-full"
+                                    :style="{ width: calculateProgress(goal.current_amount, goal.target_amount) + '%' }">
+                                </div>
+                            </div>
 
-                        <div class="text-right text-xs text-gray-500 mb-4">
-                            Target Date: {{ formatDate(goal.target_date) }}
-                        </div>
+                            <div class="text-right text-xs text-gray-500 mb-4">
+                                Target Date: {{ formatDate(goal.target_date) }}
+                            </div>
 
-                        <PrimaryButton @click="openAddFundsModal(goal)" class="w-full justify-center">
-                            Add Funds
-                        </PrimaryButton>
+                            <PrimaryButton @click="openAddFundsModal(goal)" class="w-full justify-center"
+                                :disabled="parseFloat(goal.current_amount) >= parseFloat(goal.target_amount)"
+                                :class="{ 'opacity-50 cursor-not-allowed': parseFloat(goal.current_amount) >= parseFloat(goal.target_amount) }">
+                                <span v-if="parseFloat(goal.current_amount) >= parseFloat(goal.target_amount)">Goal
+                                    Reached</span>
+                                <span v-else>Add Funds</span>
+                            </PrimaryButton>
+                        </div>
+                    </div>
+
+                    <div v-if="goals.data.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-12">
+                        No savings goals yet. Create one to start saving!
+                    </div>
+                    <div class="mt-6">
+                        <Pagination :links="goals.links" />
                     </div>
                 </div>
-                
-                <div v-if="goals.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-12">
-                    No savings goals yet. Create one to start saving!
-                </div>
             </div>
-        </div>
         </div>
 
         <!-- Create/Edit Modal -->
@@ -202,43 +241,29 @@ const calculateProgress = (current, target) => {
 
                 <div class="mt-6">
                     <InputLabel for="name" value="Goal Name" />
-                    <InputText 
-                        id="name" 
-                        v-model="form.name" 
-                        type="text" 
-                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                        placeholder="e.g. New Car" 
-                    />
+                    <InputText id="name" v-model="form.name" type="text"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="e.g. New Car" />
                     <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="target_amount" value="Target Amount" />
-                    <InputText 
-                        id="target_amount" 
-                        v-model="form.target_amount" 
-                        type="number" 
-                        step="0.01" 
-                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                        placeholder="0.00" 
-                    />
-                    <div v-if="form.errors.target_amount" class="text-red-500 text-sm mt-1">{{ form.errors.target_amount }}</div>
+                    <InputText id="target_amount" v-model="form.target_amount" type="number" step="0.01"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="0.00" />
+                    <div v-if="form.errors.target_amount" class="text-red-500 text-sm mt-1">{{ form.errors.target_amount
+                    }}
+                    </div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="target_date" value="Target Date" />
-                    <DatePicker 
-                        id="target_date" 
-                        v-model="form.target_date" 
-                        dateFormat="yy-mm-dd" 
-                        showIcon 
-                        showOnFocus 
-                        appendTo="body" 
-                        panelClass="!z-[9999]"
-                        class="mt-1 w-full" 
-                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" 
-                    />
-                    <div v-if="form.errors.target_date" class="text-red-500 text-sm mt-1">{{ form.errors.target_date }}</div>
+                    <DatePicker id="target_date" v-model="form.target_date" dateFormat="yy-mm-dd" showIcon showOnFocus
+                        appendTo="body" panelClass="!z-[9999]" class="mt-1 w-full"
+                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
+                    <div v-if="form.errors.target_date" class="text-red-500 text-sm mt-1">{{ form.errors.target_date }}
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -259,15 +284,11 @@ const calculateProgress = (current, target) => {
 
                 <div class="mt-6">
                     <InputLabel for="add_amount" value="Amount to Add" />
-                    <InputText 
-                        id="add_amount" 
-                        v-model="addFundsForm.add_amount" 
-                        type="number" 
-                        step="0.01" 
-                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                        placeholder="0.00" 
-                    />
-                    <div v-if="addFundsForm.errors.add_amount" class="text-red-500 text-sm mt-1">{{ addFundsForm.errors.add_amount }}</div>
+                    <InputText id="add_amount" v-model="addFundsForm.add_amount" type="number" step="0.01"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="0.00" />
+                    <div v-if="addFundsForm.errors.add_amount" class="text-red-500 text-sm mt-1">{{
+                        addFundsForm.errors.add_amount }}</div>
                 </div>
 
                 <div class="mt-6 flex justify-end">

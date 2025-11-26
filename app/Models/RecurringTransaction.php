@@ -17,6 +17,7 @@ class RecurringTransaction extends Model
         'start_date',
         'next_run_date',
         'description',
+        'reminder_days',
     ];
 
     protected $casts = [

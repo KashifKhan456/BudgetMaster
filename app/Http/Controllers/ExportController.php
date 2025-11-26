@@ -12,7 +12,7 @@ class ExportController extends Controller
     public function export()
     {
         $transactions = Transaction::where('user_id', Auth::id())
-            ->with('category')
+            ->with(['category', 'splits.category'])
             ->orderBy('date', 'desc')
             ->get();
 
@@ -30,13 +30,25 @@ class ExportController extends Controller
             fputcsv($file, ['Date', 'Type', 'Category', 'Amount', 'Description']);
 
             foreach ($transactions as $transaction) {
-                fputcsv($file, [
-                    $transaction->date,
-                    $transaction->type,
-                    $transaction->category ? $transaction->category->name : 'Uncategorized',
-                    $transaction->amount,
-                    $transaction->description
-                ]);
+                if ($transaction->splits->isNotEmpty()) {
+                    foreach ($transaction->splits as $split) {
+                        fputcsv($file, [
+                            $transaction->date,
+                            $transaction->type,
+                            $split->category ? $split->category->name : 'Uncategorized',
+                            $split->amount,
+                            $transaction->description . ' (Split: ' . ($split->description ?? $split->category->name) . ')'
+                        ]);
+                    }
+                } else {
+                    fputcsv($file, [
+                        $transaction->date,
+                        $transaction->type,
+                        $transaction->category ? $transaction->category->name : 'Uncategorized',
+                        $transaction->amount,
+                        $transaction->description
+                    ]);
+                }
             }
 
             fclose($file);

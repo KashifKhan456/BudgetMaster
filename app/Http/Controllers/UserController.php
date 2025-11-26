@@ -24,7 +24,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->get()->map(function ($user) {
+        $users = $query->paginate(10)->withQueryString()->through(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,

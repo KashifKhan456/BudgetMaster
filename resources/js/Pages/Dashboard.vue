@@ -16,7 +16,10 @@ const props = defineProps({
     recentTransactions: Array,
     categories: Array, // Assuming categories are passed to dashboard
     filters: Object,
+    insights: Array,
 });
+
+import InsightsWidget from '@/Components/Dashboard/InsightsWidget.vue';
 
 const search = ref(props.filters?.search || '');
 const category = ref(props.filters?.category || '');
@@ -116,6 +119,9 @@ const chartOptions = {
                     </div>
                 </div>
 
+                <!-- AI Spending Insights -->
+                <InsightsWidget :insights="insights" />
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <!-- Chart: Expenses by Category -->
                     <div class="bg-white dark:bg-[#1a1a1a] overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -175,8 +181,11 @@ const chartOptions = {
                                 <tr v-for="transaction in recentTransactions" :key="transaction.id">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ formatDate(transaction.date) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :style="{ backgroundColor: transaction.category?.color + '20', color: transaction.category?.color }">
-                                            {{ transaction.category?.name }}
+                                        <span v-if="transaction.splits && transaction.splits.length > 0" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                            Split ({{ transaction.splits.length }})
+                                        </span>
+                                        <span v-else class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :style="{ backgroundColor: transaction.category?.color + '20', color: transaction.category?.color }">
+                                            {{ transaction.category?.name || 'Uncategorized' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-2 text-sm font-medium" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">

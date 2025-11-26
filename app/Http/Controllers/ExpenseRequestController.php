@@ -29,7 +29,8 @@ class ExpenseRequestController extends Controller
                       });
             })
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         $ownedBudgets = $user->budgets()->get();
         $sharedBudgets = $user->sharedBudgets()->get();

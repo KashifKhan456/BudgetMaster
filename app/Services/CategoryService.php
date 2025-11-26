@@ -19,7 +19,7 @@ class CategoryService
             $query->where('type', $filters['type']);
         }
 
-        return $query->get();
+        return $query->paginate(10)->withQueryString();
     }
 
     public function createCategory(array $data): Category

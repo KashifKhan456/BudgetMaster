@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@primevue/themes": "^4.4.1",
+        "canvas-confetti": "^1.9.4",
         "chart.js": "^4.5.1",
         "lodash": "^4.17.21",
         "primeicons": "^7.0.0",

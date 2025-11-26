@@ -38,7 +38,7 @@ class BudgetService
             $query->where('start_date', '<=', $filters['end_date']);
         }
 
-        return $query->get();
+        return $query->paginate(10)->withQueryString();
     }
 
     public function shareBudget(int $budgetId, string $email)

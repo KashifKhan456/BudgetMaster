@@ -20,6 +20,7 @@ class StoreRecurringTransactionRequest extends FormRequest
             'interval' => 'required|in:daily,weekly,monthly,yearly',
             'start_date' => 'required|date',
             'description' => 'nullable|string|max:255',
+            'reminder_days' => 'nullable|integer|in:1,2,3,7',
         ];
     }
 }

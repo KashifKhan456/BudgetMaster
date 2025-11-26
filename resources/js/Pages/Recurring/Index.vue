@@ -11,12 +11,14 @@ import DangerButton from '@/Components/DangerButton.vue';
 import { formatDate } from '@/Utils/date';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
+
 import DatePicker from 'primevue/datepicker';
+import Pagination from '@/Components/Pagination.vue';
 
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
-    recurringTransactions: Array,
+    recurringTransactions: Object,
     categories: Array,
     filters: Object,
 });
@@ -52,6 +54,7 @@ const form = useForm({
     interval: 'monthly',
     start_date: new Date().toISOString().split('T')[0],
     description: '',
+    reminder_days: null,
 });
 
 const editingTransaction = ref(null);
@@ -66,6 +69,7 @@ const openModal = (transaction = null) => {
         form.interval = transaction.interval;
         form.start_date = new Date(transaction.start_date);
         form.description = transaction.description;
+        form.reminder_days = transaction.reminder_days;
     } else {
         editingTransaction.value = null;
         form.reset();
@@ -101,12 +105,14 @@ const deleteTransaction = (id) => {
 </script>
 
 <template>
+
     <Head title="Recurring Transactions" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Recurring Transactions</h2>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Recurring Transactions
+                </h2>
                 <PrimaryButton @click="openModal()">Add Recurring</PrimaryButton>
             </div>
         </template>
@@ -119,85 +125,100 @@ const deleteTransaction = (id) => {
                         <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <InputLabel for="filter_search" value="Search" />
-                                <InputText 
-                                    id="filter_search" 
-                                    v-model="filters.search" 
-                                    type="text" 
-                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                                    placeholder="Search description..." 
-                                />
+                                <InputText id="filter_search" v-model="filters.search" type="text"
+                                    class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    placeholder="Search description..." />
                             </div>
                             <div>
                                 <InputLabel for="filter_category" value="Category" />
-                                <Select 
-                                    id="filter_category" 
-                                    v-model="filters.category_id" 
-                                    :options="categories" 
-                                    optionLabel="name" 
-                                    optionValue="id" 
-                                    placeholder="All Categories" 
-                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                                    showClear 
-                                />
+                                <Select id="filter_category" v-model="filters.category_id" :options="categories"
+                                    optionLabel="name" optionValue="id" placeholder="All Categories"
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    showClear />
                             </div>
                             <div>
                                 <InputLabel for="filter_type" value="Type" />
-                                <Select 
-                                    id="filter_type" 
-                                    v-model="filters.type" 
-                                    :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
-                                    optionLabel="label" 
-                                    optionValue="value" 
-                                    placeholder="All Types" 
-                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                                    showClear 
-                                />
+                                <Select id="filter_type" v-model="filters.type"
+                                    :options="[{ label: 'Expense', value: 'expense' }, { label: 'Income', value: 'income' }]"
+                                    optionLabel="label" optionValue="value" placeholder="All Types"
+                                    class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    showClear />
                             </div>
                         </div>
 
                         <div class="overflow-x-auto relative">
-                            <div v-if="loading" class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
-                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <div v-if="loading"
+                                class="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-50 rounded-lg">
+                                <svg class="animate-spin h-8 w-8 text-indigo-500" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
                                 </svg>
                             </div>
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead>
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Interval</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Next Run</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Description</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Category</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Amount</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Interval</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Next Run</th>
+                                        <th
+                                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-[#1a1a1a] divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="transaction in recurringTransactions" :key="transaction.id">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ transaction.description || '-' }}</td>
+                                    <tr v-for="transaction in recurringTransactions.data" :key="transaction.id">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ transaction.description ||
+                                            '-' }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :style="{ backgroundColor: transaction.category?.color + '20', color: transaction.category?.color }">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                :style="{ backgroundColor: transaction.category?.color + '20', color: transaction.category?.color }">
                                                 {{ transaction.category?.name || 'Uncategorized' }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold"
+                                            :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
                                             {{ transaction.type === 'income' ? '+' : '-' }}${{ transaction.amount }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap capitalize">{{ transaction.interval }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{ formatDate(transaction.next_run_date) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap capitalize">{{ transaction.interval }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">{{
+                                            formatDate(transaction.next_run_date)
+                                        }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button @click="openModal(transaction)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
-                                            <button @click="deleteTransaction(transaction.id)" class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
+                                            <button @click="openModal(transaction)"
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</button>
+                                            <button @click="deleteTransaction(transaction.id)"
+                                                class="text-red-600 dark:text-red-400 hover:text-red-900">Delete</button>
                                         </td>
                                     </tr>
-                                    <tr v-if="recurringTransactions.length === 0">
+                                    <tr v-if="recurringTransactions.data.length === 0">
                                         <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                             No records found.
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-6">
+                            <Pagination :links="recurringTransactions.links" />
                         </div>
                     </div>
                 </div>
@@ -212,89 +233,70 @@ const deleteTransaction = (id) => {
 
                 <div class="mt-6">
                     <InputLabel for="type" value="Type" />
-                    <Select 
-                        id="type" 
-                        v-model="form.type" 
-                        :options="[{label: 'Expense', value: 'expense'}, {label: 'Income', value: 'income'}]" 
-                        optionLabel="label" 
-                        optionValue="value" 
-                        appendTo="body"
-                        overlayClass="!z-[9999]"
-                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                    />
+                    <Select id="type" v-model="form.type"
+                        :options="[{ label: 'Expense', value: 'expense' }, { label: 'Income', value: 'income' }]"
+                        optionLabel="label" optionValue="value" appendTo="body" overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                     <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">{{ form.errors.type }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="amount" value="Amount" />
-                    <InputText 
-                        id="amount" 
-                        v-model="form.amount" 
-                        type="number" 
-                        step="0.01" 
-                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                        placeholder="0.00" 
-                    />
+                    <InputText id="amount" v-model="form.amount" type="number" step="0.01"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="0.00" />
                     <div v-if="form.errors.amount" class="text-red-500 text-sm mt-1">{{ form.errors.amount }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="category_id" value="Category" />
-                    <Select 
-                        id="category_id" 
-                        v-model="form.category_id" 
-                        :options="categories" 
-                        optionLabel="name" 
-                        optionValue="id" 
-                        placeholder="Select Category" 
-                        appendTo="body"
-                        overlayClass="!z-[9999]"
-                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                    />
-                    <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
+                    <Select id="category_id" v-model="form.category_id" :options="categories" optionLabel="name"
+                        optionValue="id" placeholder="Select Category" appendTo="body" overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                    <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}
+                    </div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="interval" value="Interval" />
-                    <Select 
-                        id="interval" 
-                        v-model="form.interval" 
-                        :options="[{label: 'Daily', value: 'daily'}, {label: 'Weekly', value: 'weekly'}, {label: 'Monthly', value: 'monthly'}, {label: 'Yearly', value: 'yearly'}]" 
-                        optionLabel="label" 
-                        optionValue="value" 
-                        appendTo="body"
-                        overlayClass="!z-[9999]"
-                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                    />
+                    <Select id="interval" v-model="form.interval"
+                        :options="[{ label: 'Daily', value: 'daily' }, { label: 'Weekly', value: 'weekly' }, { label: 'Monthly', value: 'monthly' }, { label: 'Yearly', value: 'yearly' }]"
+                        optionLabel="label" optionValue="value" appendTo="body" overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
                     <div v-if="form.errors.interval" class="text-red-500 text-sm mt-1">{{ form.errors.interval }}</div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="start_date" value="Start Date" />
-                    <DatePicker 
-                        id="start_date" 
-                        v-model="form.start_date" 
-                        dateFormat="yy-mm-dd" 
-                        showIcon 
-                        showOnFocus 
-                        appendTo="body" 
-                        panelClass="!z-[9999]"
-                        class="mt-1 w-full" 
-                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" 
-                    />
-                    <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date }}</div>
+                    <DatePicker id="start_date" v-model="form.start_date" dateFormat="yy-mm-dd" showIcon showOnFocus
+                        appendTo="body" panelClass="!z-[9999]" class="mt-1 w-full"
+                        inputClass="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" />
+                    <div v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">{{ form.errors.start_date }}
+                    </div>
                 </div>
 
                 <div class="mt-4">
                     <InputLabel for="description" value="Description" />
-                    <InputText 
-                        id="description" 
-                        v-model="form.description" 
-                        type="text" 
-                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" 
-                        placeholder="Description (optional)" 
-                    />
-                    <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">{{ form.errors.description }}</div>
+                    <InputText id="description" v-model="form.description" type="text"
+                        class="mt-1 block w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="Description (optional)" />
+                    <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">{{ form.errors.description }}
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <InputLabel for="reminder_days" value="Remind Me" />
+                    <Select id="reminder_days" v-model="form.reminder_days" :options="[
+                        { label: 'No Reminder', value: null },
+                        { label: '1 Day Before', value: 1 },
+                        { label: '2 Days Before', value: 2 },
+                        { label: '3 Days Before', value: 3 },
+                        { label: '7 Days Before', value: 7 }
+                    ]" optionLabel="label" optionValue="value" appendTo="body" overlayClass="!z-[9999]"
+                        class="mt-1 w-full border-gray-300 dark:border-[#404040] dark:bg-[#262626] dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
+                    <div v-if="form.errors.reminder_days" class="text-red-500 text-sm mt-1">{{ form.errors.reminder_days
+                    }}
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end">
