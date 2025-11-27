@@ -33,37 +33,39 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <div v-if="status" class="mb-4 text-sm font-medium text-green-400">
             {{ status }}
         </div>
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Email" class="text-gray-300" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full bg-white/5 border-white/10 text-white focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-500"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
+                    placeholder="name@example.com"
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Password" class="text-gray-300" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full bg-white/5 border-white/10 text-white focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-500"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    placeholder="••••••••"
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
@@ -71,24 +73,22 @@ const submit = () => {
 
             <div class="mt-4 block">
                 <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
-                        >Remember me</span
-                    >
+                    <Checkbox name="remember" v-model:checked="form.remember" class="bg-gray-800 border-gray-600 text-indigo-500 focus:ring-indigo-500" />
+                    <span class="ms-2 text-sm text-gray-400">Remember me</span>
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-6 flex items-center justify-between">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                    class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
                 >
-                    Forgot your password?
+                    Forgot password?
                 </Link>
 
                 <PrimaryButton
-                    class="ms-4"
+                    class="ms-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-0 focus:ring-indigo-500"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >

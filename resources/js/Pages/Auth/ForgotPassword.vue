@@ -40,16 +40,17 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Email" class="text-gray-300" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full bg-white/5 border-white/10 text-white focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-500"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
+                    placeholder="name@example.com"
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
@@ -57,6 +58,7 @@ const submit = () => {
 
             <div class="mt-4 flex items-center justify-end">
                 <PrimaryButton
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-0 focus:ring-indigo-500"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
