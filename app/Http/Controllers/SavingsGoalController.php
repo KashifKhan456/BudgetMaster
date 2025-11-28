@@ -6,6 +6,7 @@ use App\Models\SavingsGoal;
 use App\Http\Requests\StoreSavingsGoalRequest;
 use App\Http\Requests\UpdateSavingsGoalRequest;
 use App\Services\SavingsGoalService;
+use App\Services\AchievementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Auth;
 class SavingsGoalController extends Controller
 {
     protected $savingsGoalService;
+    protected $achievementService;
 
-    public function __construct(SavingsGoalService $savingsGoalService)
+    public function __construct(SavingsGoalService $savingsGoalService, AchievementService $achievementService)
     {
         $this->savingsGoalService = $savingsGoalService;
+        $this->achievementService = $achievementService;
     }
 
     public function index(Request $request)
@@ -30,6 +33,7 @@ class SavingsGoalController extends Controller
     public function store(StoreSavingsGoalRequest $request)
     {
         $this->savingsGoalService->createSavingsGoal($request->validated());
+        $this->achievementService->checkAndUnlock(Auth::user(), 'goal_created');
 
         return redirect()->back()->with('success', 'Savings goal created successfully.');
     }

@@ -37,9 +37,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('recurring', RecurringTransactionController::class);
     Route::resource('goals', SavingsGoalController::class);
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/achievements', [App\Http\Controllers\AchievementController::class, 'index'])->name('achievements.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/export', [ExportController::class, 'export'])->name('export.transactions');
     Route::post('/import', [ImportController::class, 'store'])->name('import.transactions');
+    Route::post('/chatbot/message', [App\Http\Controllers\ChatbotController::class, 'message'])->name('chatbot.message');
 
     Route::group(['middleware' => ['can:manage users']], function () {
         Route::resource('users', UserController::class);

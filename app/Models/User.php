@@ -59,6 +59,14 @@ class User extends Authenticatable
         return $this->hasMany(Budget::class);
     }
 
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+            ->withPivot('unlocked_at')
+            ->withTimestamps();
+    }
+
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -72,5 +80,10 @@ class User extends Authenticatable
     public function expenseRequests()
     {
         return $this->hasMany(ExpenseRequest::class);
+    }
+
+    public function savingsGoals()
+    {
+        return $this->hasMany(SavingsGoal::class);
     }
 }

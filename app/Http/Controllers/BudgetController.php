@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Http\Requests\StoreBudgetRequest;
 use App\Http\Requests\UpdateBudgetRequest;
 use App\Services\BudgetService;
+use App\Services\AchievementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,12 @@ use Illuminate\Support\Facades\Auth;
 class BudgetController extends Controller
 {
     protected $budgetService;
+    protected $achievementService;
 
-    public function __construct(BudgetService $budgetService)
+    public function __construct(BudgetService $budgetService, AchievementService $achievementService)
     {
         $this->budgetService = $budgetService;
+        $this->achievementService = $achievementService;
     }
 
     public function index(Request $request)
@@ -32,6 +35,7 @@ class BudgetController extends Controller
     public function store(StoreBudgetRequest $request)
     {
         $this->budgetService->createBudget($request->validated());
+        $this->achievementService->checkAndUnlock(Auth::user(), 'budget_created');
 
         return redirect()->back()->with('success', 'Budget created successfully.');
     }

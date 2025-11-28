@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Services\TransactionService;
+use App\Services\AchievementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,12 @@ use Illuminate\Support\Facades\Auth;
 class TransactionController extends Controller
 {
     protected $transactionService;
+    protected $achievementService;
 
-    public function __construct(TransactionService $transactionService)
+    public function __construct(TransactionService $transactionService, AchievementService $achievementService)
     {
         $this->transactionService = $transactionService;
+        $this->achievementService = $achievementService;
     }
 
     public function index(Request $request)
@@ -34,6 +37,7 @@ class TransactionController extends Controller
     public function store(StoreTransactionRequest $request)
     {
         $this->transactionService->createTransaction($request->validated());
+        $this->achievementService->checkAndUnlock(Auth::user(), 'transaction_count');
 
         return redirect()->back()->with('success', 'Transaction created successfully.');
     }

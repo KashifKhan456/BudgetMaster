@@ -11,6 +11,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import Drawer from 'primevue/drawer';
 import Button from 'primevue/button';
+import ChatbotWidget from '@/Components/ChatbotWidget.vue';
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
@@ -36,6 +37,23 @@ watch(() => page.props.flash, (flash) => {
             color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
         });
     }
+    if (flash?.achievement_unlocked) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Achievement Unlocked!',
+            text: flash.achievement_unlocked,
+            timer: 4000,
+            showConfirmButton: false,
+            background: document.documentElement.classList.contains('dark') ? '#1a1a1a' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
+            backdrop: `
+                rgba(0,0,123,0.4)
+                url("https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif")
+                left top
+                no-repeat
+            `
+        });
+    }
 }, { deep: true });
 </script>
 
@@ -59,7 +77,7 @@ watch(() => page.props.flash, (flash) => {
                             </div>
 
                             <!-- Navigation Links -->
-                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div class="hidden space-x-4 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
@@ -85,6 +103,9 @@ watch(() => page.props.flash, (flash) => {
                                 <NavLink :href="route('expense-requests.index')"
                                     :active="route().current('expense-requests.*')">
                                     Requests
+                                </NavLink>
+                                <NavLink :href="route('achievements.index')" :active="route().current('achievements.*')">
+                                    Achievements
                                 </NavLink>
                                 <NavLink v-if="$page.props.auth.can.manage_users" :href="route('users.index')"
                                     :active="route().current('users.*')">
@@ -181,6 +202,9 @@ watch(() => page.props.flash, (flash) => {
                             :active="route().current('expense-requests.*')">
                             Requests
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('achievements.index')" :active="route().current('achievements.*')">
+                            Achievements
+                        </ResponsiveNavLink>
                         <ResponsiveNavLink v-if="$page.props.auth.can.manage_users" :href="route('users.index')"
                             :active="route().current('users.*')">
                             Users
@@ -218,5 +242,6 @@ watch(() => page.props.flash, (flash) => {
                 <slot />
             </main>
         </div>
+        <ChatbotWidget />
     </div>
 </template>
