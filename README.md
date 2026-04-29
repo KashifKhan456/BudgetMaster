@@ -210,7 +210,7 @@ Please follow the code style used in the project and add/adjust tests for new be
 This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details. Change to your preferred license if necessary.
 
 ## Contact
-Project maintained by: Your Name — kashif.tech.317@gmail.com
+Project maintained by: Kashif Khan — kashif.tech.317@gmail.com
 Repo: https://github.com/<your-org>/BudgetMaster
 
 ## Acknowledgements
